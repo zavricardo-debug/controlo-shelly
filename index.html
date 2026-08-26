@@ -2,33 +2,41 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Controlo Shelly</title>
+  <title>Controlo Automático Shelly</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 100px; background: #fafafa; color: #333; }
+    .status { font-size: 20px; font-weight: bold; color: #007bff; }
+  </style>
 </head>
 <body>
 
-  <h1>A enviar comando para a Shelly...</h1>
+  <h1>Painel Shelly Cloud</h1>
+  <p id="status-texto" class="status">A ligar à Shelly Cloud...</p>
 
   <script>
-    // Isto substitui o $w.onReady() do Wix para funcionar na internet normal (GitHub/Canvas)
+    // Substituição oficial do $w.onReady do Wix para o GitHub/Canvas
     window.addEventListener("DOMContentLoaded", function () {
+        const status = document.getElementById("status-texto");
 
-        // O seu código fetch original corrigido, fechado e com o modo no-cors ativado
-        fetch("https://shelly-37-eu.shelly.cloud/device/relay/control", {
-            body: "channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            method: "POST",
-            mode: "no-cors" // Obrigatório para evitar o bloqueio de CORS no navegador
+        // Técnica de URL Direta (GET) para contornar o desaparecimento de dados causado pelo CORS
+        const urlBase = "https://shelly.cloud";
+        const parametros = "?channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458";
+
+        fetch(urlBase + parametros, {
+            method: "GET",
+            mode: "no-cors" // Remove o bloqueio do navegador
         })
         .then(function() {
-            console.log("Comando enviado com sucesso!");
+            status.textContent = "🟢 Comando enviado com sucesso!";
+            status.style.color = "#28a745";
+            console.log("Pedido processado.");
         })
         .catch(function(err) {
-            console.error("Erro na ligação:", err);
+            status.textContent = "🔴 Falha crítica na rede.";
+            status.style.color = "#dc3545";
+            console.error(err);
         });
-
-    }); // Fecho correto da função ready
+    });
   </script>
 
 </body>
