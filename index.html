@@ -2,38 +2,30 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Controlo Shelly API V2</title>
+  <title>Controlo Shelly API V2 - Estável</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin-top: 80px; background: #fafafa; color: #333; }
     .status { font-size: 18px; font-weight: bold; color: #007bff; }
-    .proxy-link { display: none; margin-top: 20px; font-size: 14px; color: #666; }
-    a { color: #007bff; font-weight: bold; text-decoration: none; }
   </style>
 </head>
 <body>
 
   <h1>Painel Shelly Cloud (API V2)</h1>
-  <p id="status-texto" class="status">A preparar envio para a API V2...</p>
-  
-  <div id="bloco-proxy" class="proxy-link">
-    ⚠️ Se o comando falhar por falta de permissão, ative o acesso temporário ao proxy: <br>
-    <a href="https://herokuapp.com" target="_blank">Ativar Servidor Proxy da Shelly</a>
-  </div>
+  <p id="status-texto" class="status">A aguardar carregamento...</p>
 
   <script>
     window.addEventListener("DOMContentLoaded", function () {
         const status = document.getElementById("status-texto");
-        const blocoProxy = document.getElementById("bloco-proxy");
 
-        // 1. Usamos o proxy para o navegador não bloquear o envio por CORS
-        const proxyUrl = "https://herokuapp.com";
+        // 1. NOVO PROXY ESTÁVEL (Sem necessidade de links de ativação)
+        const proxyUrl = "https://corsproxy.io?";
         
-        // 2. NOVA ROTA OFICIAL DA API V2 DA SHELLY
+        // 2. Rota Oficial V2 da Shelly
         const targetUrl = "https://shelly.cloud";
 
-        status.textContent = "A enviar pulso via API Cloud V2...";
+        status.textContent = "A enviar pulso seguro via API Cloud V2...";
 
-        // 3. Estrutura de dados JSON estrita exigida pela nova API V2
+        // 3. Estrutura de dados JSON exigida pela Shelly
         const dadosDoPedido = {
             id: "441793a5621c",
             auth_key: "ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458",
@@ -42,34 +34,32 @@
             timer: 1
         };
 
-        fetch(proxyUrl + targetUrl, {
+        // O novo proxy exige que a URL de destino seja passada como parâmetro limpo
+        fetch(proxyUrl + encodeURIComponent(targetUrl), {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "X-Requested-With": "XMLHttpRequest"
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify(dadosDoPedido) // Transforma o objeto JSON em string válida
+            body: JSON.stringify(dadosDoPedido)
         })
         .then(function(response) {
-            if (!response.ok) throw new Error("Erro de comunicação com o Proxy.");
+            if (!response.ok) throw new Error("Erro no servidor de Proxy.");
             return response.json();
         })
         .then(function(data) {
-            console.log("Resposta oficial da Shelly V2:", data);
+            console.log("Resposta da Shelly:", data);
             
-            // A API V2 valida o sucesso através do parâmetro 'isok'
             if (data.isok === true) {
-                status.textContent = "🟢 Sucesso! O dispositivo Shelly foi acionado via API V2.";
+                status.textContent = "🟢 Sucesso! O dispositivo Shelly foi acionado.";
                 status.style.color = "#28a745";
             } else {
-                status.textContent = "❌ A Cloud rejeitou o pedido. Verifique as credenciais ou se o aparelho está online.";
+                status.textContent = "❌ A Cloud rejeitou o pedido. Verifique as suas credenciais.";
                 status.style.color = "#dc3545";
             }
         })
         .catch(function(err) {
-            status.textContent = "🔴 O servidor de envio precisa de ativação.";
+            status.textContent = "🔴 Falha crítica ao contactar o servidor proxy.";
             status.style.color = "#dc3545";
-            blocoProxy.style.display = "block";
             console.error(err);
         });
     });
