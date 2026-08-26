@@ -2,38 +2,65 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Controlo Automático Shelly</title>
+  <title>Controlo Definitivo Shelly</title>
   <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 100px; background: #fafafa; color: #333; }
-    .status { font-size: 20px; font-weight: bold; color: #007bff; }
+    body { font-family: sans-serif; text-align: center; margin-top: 80px; background: #fafafa; color: #333; }
+    .status { font-size: 18px; font-weight: bold; color: #007bff; }
+    .instrucoes { font-size: 14px; color: #666; margin-top: 20px; }
+    a { color: #007bff; font-weight: bold; text-decoration: none; }
   </style>
 </head>
 <body>
 
   <h1>Painel Shelly Cloud</h1>
-  <p id="status-texto" class="status">A ligar à Shelly Cloud...</p>
+  <p id="status-texto" class="status">A preparar envio seguro...</p>
+  
+  <div id="bloco-ativacao" class="instrucoes" style="display:none;">
+    ⚠️ Se o comando falhar, precisa de ativar o acesso ao servidor temporário uma única vez clicando aqui:<br>
+    <a href="https://herokuapp.com" target="_blank">Ativar Acesso ao Proxy da Shelly</a>
+  </div>
 
   <script>
-    // Substituição oficial do $w.onReady do Wix para o GitHub/Canvas
     window.addEventListener("DOMContentLoaded", function () {
         const status = document.getElementById("status-texto");
+        const blocoAtivacao = document.getElementById("bloco-ativacao");
 
-        // Técnica de URL Direta (GET) para contornar o desaparecimento de dados causado pelo CORS
-        const urlBase = "https://shelly.cloud";
-        const parametros = "?channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458";
+        // Endereços ajustados: Passamos pelo Proxy mantendo o destino oficial da Shelly
+        const proxyUrl = "https://herokuapp.com";
+        const targetUrl = "https://shelly-37-eu.shelly.cloud/device/relay/control";
 
-        fetch(urlBase + parametros, {
-            method: "GET",
-            mode: "no-cors" // Remove o bloqueio do navegador
+        status.textContent = "A enviar comando POST via Proxy Autorizado...";
+
+        fetch(proxyUrl + targetUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            // Os dados originais em formato x-www-form-urlencoded
+            body: "channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458"
         })
-        .then(function() {
-            status.textContent = "🟢 Comando enviado com sucesso!";
-            status.style.color = "#28a745";
-            console.log("Pedido processado.");
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error("Erro no servidor Proxy");
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            console.log("Resposta da Shelly:", data);
+            
+            if (data.isok === true) {
+                status.textContent = "🟢 Sucesso! O relé da Shelly foi acionado.";
+                status.style.color = "#28a745";
+            } else {
+                status.textContent = "❌ A API da Shelly rejeitou as credenciais (ID ou Chave incorretos).";
+                status.style.color = "#dc3545";
+            }
         })
         .catch(function(err) {
-            status.textContent = "🔴 Falha crítica na rede.";
+            status.textContent = "🔴 O servidor de envio precisa de ativação.";
             status.style.color = "#dc3545";
+            blocoAtivacao.style.display = "block";
             console.error(err);
         });
     });
