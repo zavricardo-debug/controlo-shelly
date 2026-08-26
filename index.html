@@ -39,27 +39,26 @@
       ctx.fillText(botao.texto, botao.x + (botao.largura / 2), botao.y + (botao.height / 2));
     }
 
-    function enviarComando() {
-  statusTexto.textContent = "A enviar sinal ignorando CORS...";
+   function enviarComando() {
+  statusTexto.textContent = "A acionar dispositivo via URL direta...";
   statusTexto.style.color = "#007bff";
-  
-  // Forçamos o modo 'no-cors' para o navegador ignorar a restrição da Shelly
-  fetch("https://shelly.cloud", { 
-    method: "POST",
-    mode: "no-cors", 
-    headers: { 
-      "Content-Type": "application/x-www-form-urlencoded" 
-    }, 
-    body: "channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458"
+
+  // Montamos todos os parâmetros diretamente no link (Query String)
+  const urlBase = "https://shelly.cloud";
+  const params = "?channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458";
+
+  fetch(urlBase + params, { 
+    method: "GET", // Mudamos para GET para garantir que os dados vão no link
+    mode: "no-cors" // O navegador limpa o CORS, mas os dados chegam intactos à Shelly
   })
   .then(() => {
-    // Como o modo no-cors não permite ler a resposta, assumimos sucesso se não houver quebra de rede
-    statusTexto.textContent = "🟢 Comando enviado com sucesso para a Shelly!";
+    // Como o modo no-cors não permite ler a resposta, assumimos o envio automático
+    statusTexto.textContent = "🟢 Comando enviado! Verifique o seu dispositivo.";
     statusTexto.style.color = "#28a745";
   })
   .catch(err => {
-    console.error(err);
-    statusTexto.textContent = "🔴 Erro crítico de rede.";
+    console.error("Erro de rede:", err);
+    statusTexto.textContent = "🔴 Falha na ligação.";
     statusTexto.style.color = "#dc3545";
   });
 }
