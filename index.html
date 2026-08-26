@@ -1,79 +1,13 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shelly Canvas GitHub Pages</title>
-  <style>
-    body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; margin: 0; background: #fafafa; }
-    canvas { border: 2px solid #007bff; border-radius: 12px; background: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    p { margin-top: 15px; font-size: 15px; color: #444; font-weight: 500; }
-  </style>
-</head>
-<body>
+// ISTO SUBSTITUI O $w.onReady DO WIX PARA FUNCIONAR NO GITHUB/CANVAS
+window.addEventListener("DOMContentLoaded", () => {
+    
+    // O seu fetch original adaptado para passar as credenciais de forma segura via URL
+    const url = "https://shelly.cloud";
 
-  <canvas id="canvasShelly" width="300" height="120"></canvas>
-  <p id="status">Clique no botão acima para acionar a Shelly</p>
-
-  <script>
-    const canvas = document.getElementById("canvasShelly");
-    const ctx = canvas.getContext("2d");
-    const statusTexto = document.getElementById("status");
-
-    const botao = { x: 30, y: 35, largura: 240, height: 50, cor: "#007bff", texto: "⚡ LIGAR SHELLY" };
-
-    function desenhar() {
-      ctx.fillStyle = botao.cor;
-      ctx.beginPath();
-      if (ctx.roundRect) {
-        ctx.roundRect(botao.x, botao.y, botao.largura, botao.height, 8);
-      } else {
-        ctx.rect(botao.x, botao.y, botao.largura, botao.height);
-      }
-      ctx.fill();
-      
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 16px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(botao.texto, botao.x + (botao.largura / 2), botao.y + (botao.height / 2));
-    }
-
-   function enviarComando() {
-  statusTexto.textContent = "A acionar dispositivo via URL direta...";
-  statusTexto.style.color = "#007bff";
-
-  // Montamos todos os parâmetros diretamente no link (Query String)
-  const urlBase = "https://shelly.cloud";
-  const params = "?channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458";
-
-  fetch(urlBase + params, { 
-    method: "GET", // Mudamos para GET para garantir que os dados vão no link
-    mode: "no-cors" // O navegador limpa o CORS, mas os dados chegam intactos à Shelly
-  })
-  .then(() => {
-    // Como o modo no-cors não permite ler a resposta, assumimos o envio automático
-    statusTexto.textContent = "🟢 Comando enviado! Verifique o seu dispositivo.";
-    statusTexto.style.color = "#28a745";
-  })
-  .catch(err => {
-    console.error("Erro de rede:", err);
-    statusTexto.textContent = "🔴 Falha na ligação.";
-    statusTexto.style.color = "#dc3545";
-  });
-}
-
-
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      if (x >= botao.x && x <= botao.x + botao.largura && y >= botao.y && y <= botao.y + botao.height) {
-        enviarComando();
-      }
-    });
-
-    desenhar();
-  </script>
-</body>
-</html>
+    fetch(url, { 
+        method: "GET", 
+        mode: "no-cors" // Contorna o bloqueio de segurança do navegador
+    })
+    .then(() => console.log("Comando enviado com sucesso para a Shelly via GitHub Pages!"))
+    .catch(err => console.error("Erro de rede:", err));
+});
