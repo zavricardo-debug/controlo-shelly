@@ -1,13 +1,35 @@
-// ISTO SUBSTITUI O $w.onReady DO WIX PARA FUNCIONAR NO GITHUB/CANVAS
-window.addEventListener("DOMContentLoaded", () => {
-    
-    // O seu fetch original adaptado para passar as credenciais de forma segura via URL
-    const url = "https://shelly.cloud";
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Controlo Shelly</title>
+</head>
+<body>
 
-    fetch(url, { 
-        method: "GET", 
-        mode: "no-cors" // Contorna o bloqueio de segurança do navegador
-    })
-    .then(() => console.log("Comando enviado com sucesso para a Shelly via GitHub Pages!"))
-    .catch(err => console.error("Erro de rede:", err));
-});
+  <h1>A enviar comando para a Shelly...</h1>
+
+  <script>
+    // Isto substitui o $w.onReady() do Wix para funcionar na internet normal (GitHub/Canvas)
+    window.addEventListener("DOMContentLoaded", function () {
+
+        // O seu código fetch original corrigido, fechado e com o modo no-cors ativado
+        fetch("https://shelly-37-eu.shelly.cloud/device/relay/control", {
+            body: "channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            method: "POST",
+            mode: "no-cors" // Obrigatório para evitar o bloqueio de CORS no navegador
+        })
+        .then(function() {
+            console.log("Comando enviado com sucesso!");
+        })
+        .catch(function(err) {
+            console.error("Erro na ligação:", err);
+        });
+
+    }); // Fecho correto da função ready
+  </script>
+
+</body>
+</html>
