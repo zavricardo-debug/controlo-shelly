@@ -2,65 +2,74 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Controlo Definitivo Shelly</title>
+  <title>Controlo Shelly API V2</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin-top: 80px; background: #fafafa; color: #333; }
     .status { font-size: 18px; font-weight: bold; color: #007bff; }
-    .instrucoes { font-size: 14px; color: #666; margin-top: 20px; }
+    .proxy-link { display: none; margin-top: 20px; font-size: 14px; color: #666; }
     a { color: #007bff; font-weight: bold; text-decoration: none; }
   </style>
 </head>
 <body>
 
-  <h1>Painel Shelly Cloud</h1>
-  <p id="status-texto" class="status">A preparar envio seguro...</p>
+  <h1>Painel Shelly Cloud (API V2)</h1>
+  <p id="status-texto" class="status">A preparar envio para a API V2...</p>
   
-  <div id="bloco-ativacao" class="instrucoes" style="display:none;">
-    ⚠️ Se o comando falhar, precisa de ativar o acesso ao servidor temporário uma única vez clicando aqui:<br>
-    <a href="https://herokuapp.com" target="_blank">Ativar Acesso ao Proxy da Shelly</a>
+  <div id="bloco-proxy" class="proxy-link">
+    ⚠️ Se o comando falhar por falta de permissão, ative o acesso temporário ao proxy: <br>
+    <a href="https://herokuapp.com" target="_blank">Ativar Servidor Proxy da Shelly</a>
   </div>
 
   <script>
     window.addEventListener("DOMContentLoaded", function () {
         const status = document.getElementById("status-texto");
-        const blocoAtivacao = document.getElementById("bloco-ativacao");
+        const blocoProxy = document.getElementById("bloco-proxy");
 
-        // Endereços ajustados: Passamos pelo Proxy mantendo o destino oficial da Shelly
+        // 1. Usamos o proxy para o navegador não bloquear o envio por CORS
         const proxyUrl = "https://herokuapp.com";
-        const targetUrl = "https://shelly-37-eu.shelly.cloud/device/relay/control";
+        
+        // 2. NOVA ROTA OFICIAL DA API V2 DA SHELLY
+        const targetUrl = "https://shelly.cloud";
 
-        status.textContent = "A enviar comando POST via Proxy Autorizado...";
+        status.textContent = "A enviar pulso via API Cloud V2...";
+
+        // 3. Estrutura de dados JSON estrita exigida pela nova API V2
+        const dadosDoPedido = {
+            id: "441793a5621c",
+            auth_key: "ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458",
+            channel: 0,
+            turn: "on",
+            timer: 1
+        };
 
         fetch(proxyUrl + targetUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/json",
                 "X-Requested-With": "XMLHttpRequest"
             },
-            // Os dados originais em formato x-www-form-urlencoded
-            body: "channel=0&turn=on&timer=1&id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458"
+            body: JSON.stringify(dadosDoPedido) // Transforma o objeto JSON em string válida
         })
         .then(function(response) {
-            if (!response.ok) {
-                throw new Error("Erro no servidor Proxy");
-            }
+            if (!response.ok) throw new Error("Erro de comunicação com o Proxy.");
             return response.json();
         })
         .then(function(data) {
-            console.log("Resposta da Shelly:", data);
+            console.log("Resposta oficial da Shelly V2:", data);
             
+            // A API V2 valida o sucesso através do parâmetro 'isok'
             if (data.isok === true) {
-                status.textContent = "🟢 Sucesso! O relé da Shelly foi acionado.";
+                status.textContent = "🟢 Sucesso! O dispositivo Shelly foi acionado via API V2.";
                 status.style.color = "#28a745";
             } else {
-                status.textContent = "❌ A API da Shelly rejeitou as credenciais (ID ou Chave incorretos).";
+                status.textContent = "❌ A Cloud rejeitou o pedido. Verifique as credenciais ou se o aparelho está online.";
                 status.style.color = "#dc3545";
             }
         })
         .catch(function(err) {
             status.textContent = "🔴 O servidor de envio precisa de ativação.";
             status.style.color = "#dc3545";
-            blocoAtivacao.style.display = "block";
+            blocoProxy.style.display = "block";
             console.error(err);
         });
     });
