@@ -2,66 +2,29 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Controlo Shelly API V2 - Estável</title>
+  <title>Controlo Shelly Direto</title>
   <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 80px; background: #fafafa; color: #333; }
+    body { font-family: sans-serif; text-align: center; margin-top: 100px; background: #fafafa; color: #333; }
     .status { font-size: 18px; font-weight: bold; color: #007bff; }
   </style>
 </head>
 <body>
 
-  <h1>Painel Shelly Cloud (API V2)</h1>
-  <p id="status-texto" class="status">A aguardar carregamento...</p>
+  <h1>Painel Shelly Cloud</h1>
+  <p id="status-texto" class="status">A disparar comando de forma direta...</p>
 
   <script>
+    // Substituição universal do $w.onReady() do Wix
     window.addEventListener("DOMContentLoaded", function () {
-        const status = document.getElementById("status-texto");
-
-        // 1. NOVO PROXY ESTÁVEL (Sem necessidade de links de ativação)
-        const proxyUrl = "https://corsproxy.io?";
         
-        // 2. Rota Oficial V2 da Shelly
-        const targetUrl = "https://shelly.cloud";
+        // Nova rota estável API V2 da Shelly Cloud
+        const urlBase = "https://shelly.cloud";
+        
+        // Passamos as credenciais estruturadas em parâmetros de URL para evitar o bloqueio do corpo
+        const parametros = "?id=441793a5621c&auth_key=ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458&channel=0&turn=on&timer=1";
 
-        status.textContent = "A enviar pulso seguro via API Cloud V2...";
-
-        // 3. Estrutura de dados JSON exigida pela Shelly
-        const dadosDoPedido = {
-            id: "441793a5621c",
-            auth_key: "ZjJmMGF1aWQE3BBDBB3C3994FEF570BD05536F0B61870FB50B101EC413C1AD36FD450AB5E5381162F50DF2E1458",
-            channel: 0,
-            turn: "on",
-            timer: 1
-        };
-
-        // O novo proxy exige que a URL de destino seja passada como parâmetro limpo
-        fetch(proxyUrl + encodeURIComponent(targetUrl), {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(dadosDoPedido)
-        })
-        .then(function(response) {
-            if (!response.ok) throw new Error("Erro no servidor de Proxy.");
-            return response.json();
-        })
-        .then(function(data) {
-            console.log("Resposta da Shelly:", data);
-            
-            if (data.isok === true) {
-                status.textContent = "🟢 Sucesso! O dispositivo Shelly foi acionado.";
-                status.style.color = "#28a745";
-            } else {
-                status.textContent = "❌ A Cloud rejeitou o pedido. Verifique as suas credenciais.";
-                status.style.color = "#dc3545";
-            }
-        })
-        .catch(function(err) {
-            status.textContent = "🔴 Falha crítica ao contactar o servidor proxy.";
-            status.style.color = "#dc3545";
-            console.error(err);
-        });
+        // Força o navegador a abrir a URL diretamente, contornando qualquer barreira de CORS do Canvas ou GitHub
+        window.location.href = urlBase + parametros;
     });
   </script>
 
